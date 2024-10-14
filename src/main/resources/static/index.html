@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Relatórios em Tempo Real</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #report-section {
+            margin-top: 20px;
+        }
+        #notifications {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            margin: 10px 0;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input[type="text"], input[type="date"] {
+            padding: 10px;
+            font-size: 16px;
+            width: calc(100% - 40px);
+            margin: 10px 0;
+        }
+        a {
+            color: blue;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistema de Relatórios em Tempo Real</h1>
+    
+    <div id="report-section">
+        <h2>Gerar Relatório</h2>
+        <label for="reportName">Nome do Relatório:</label>
+        <input type="text" id="reportName" placeholder="Digite o nome do relatório" />
+        
+        <label for="reportDate">Data do Relatório:</label>
+        <input type="date" id="reportDate" />
+
+        <button id="generateReportBtn">Gerar Relatório</button>
+    </div>
+
+    <div id="notifications">
+        <h3>Notificações de Relatórios:</h3>
+    </div>
+
+    <script>
+        let eventSource;
+
+        // Função para iniciar a conexão SSE
+        function startSSE() {
+            eventSource = new EventSource('http://localhost:8080/subs');
+            
+            // Evento de inicialização
+            eventSource.addEventListener('INIT', () => {
+                console.log('Conexão estabelecida para receber notificações de relatórios.');
+            });
+
+            // Evento de notificação de relatório
+            eventSource.addEventListener('notifications', (event) => {
+                const notificationDiv = document.getElementById('notifications');
+                const newNotification = document.createElement('p');
+
+                // Inserir a notificação com o link clicável
+                newNotification.innerHTML = event.data; // já espera que o servidor envie a mensagem com o link no formato HTML
+                notificationDiv.appendChild(newNotification);
+            });
+
+            // Tratamento de erro
+            eventSource.onerror = (error) => {
+                console.log('Erro na conexão SSE: ', error);
+                stopSSE();
+            };
+        }
+
+        // Função para parar a conexão SSE
+        function stopSSE() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                console.log('Conexão SSE encerrada.');
+            }
+        }
+
+        // Função para enviar solicitação de geração de relatório ao servidor
+        document.getElementById('generateReportBtn').addEventListener('click', () => {
+    const reportName = document.getElementById('reportName').value;
+    const reportDate = document.getElementById('reportDate').value;
+
+    if (reportName && reportDate) {
+        const notificationMessage = `Seu relatório está pronto! <a href="report.html?reportName=${encodeURIComponent(reportName)}&reportDate=${encodeURIComponent(reportDate)}">Clique aqui</a> para acessá-lo.`;
+
+        fetch('http://localhost:8080/dispatchEvent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ 
+                notification: notificationMessage
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Solicitação de relatório enviada com sucesso.');
+                document.getElementById('reportName').value = ''; // Limpa o campo de nome
+                document.getElementById('reportDate').value = ''; // Limpa o campo de data
+            } else {
+                console.error('Erro ao solicitar relatório.');
+            }
+        });
+    } else {
+        alert('Por favor, preencha todos os campos para gerar o relatório.');
+    }
+	});
+
+
+        // Iniciar a escuta de SSE ao carregar a página
+        window.onload = startSSE;
+    </script>
+</body>
+</html>

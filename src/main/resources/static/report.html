@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Gerado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .report-container {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .report-info {
+            margin-bottom: 20px;
+        }
+        .report-details {
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        p {
+            line-height: 1.6;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório Gerado</h1>
+    
+    <div class="report-container">
+        <div class="report-info">
+            <h2>Informações do Relatório</h2>
+            <p><strong>Nome do Relatório:</strong> <span id="reportName">-</span></p>
+            <p><strong>Data do Relatório:</strong> <span id="reportDate">-</span></p>
+            <p><strong>Status:</strong> Concluído</p>
+        </div>
+
+        <div class="report-details">
+            <h3>Resumo do Relatório</h3>
+            <p>Este relatório foi gerado com base nas informações fornecidas pelo usuário. Ele contém uma visão geral sobre os dados especificados para o período de <span id="reportDateDetail">-</span>.</p>
+        </div>
+
+        <button onclick="window.print()">Imprimir Relatório</button>
+    </div>
+
+    <script>
+        // Simulação de recuperação dos parâmetros passados da página anterior
+        const urlParams = new URLSearchParams(window.location.search);
+        const reportName = urlParams.get('reportName');
+        const reportDate = urlParams.get('reportDate');
+
+        // Exibir as informações dinâmicas na página
+        document.getElementById('reportName').textContent = reportName || "Relatório Desconhecido";
+        document.getElementById('reportDate').textContent = reportDate || "Data Não Definida";
+        document.getElementById('reportDateDetail').textContent = reportDate || "Data Não Definida";
+    </script>
+</body>
+</html>
